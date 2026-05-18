@@ -1,0 +1,26 @@
+{
+  "tagline": "I don't scan your code. I become it.",
+  "problem": "Traditional security tools analyze from outside. Real APTs live inside.",
+  "solution": "PARASITE EVOLVED thinks like malware. Infiltrates. Evolves. Reveals.",
+  "tech_stack": [
+    "Next.js 15",
+    "Three.js (R3F)",
+    "FastAPI",
+    "LangGraph",
+    "Tree-sitter",
+    "Polygon Blockchain"
+  ],
+  "demo_stats": {
+    "files_analyzed": 4,
+    "vulnerabilities_found": 5,
+    "attack_paths_generated": 3,
+    "time_to_compromise_minutes": 1.0,
+    "natural_discovery_days": 313
+  },
+  "unique_insight": "The line between helpful AI security tool and malicious AI agent is just a toggle.",
+  "future_scope": [
+    "IDE Plugin Integration for real-time parasitic analysis",
+    "Automated Pull Request generation for symbiotic healing plans",
+    "Cross-repository infection analysis for microservice architectures"
+  ]
+}

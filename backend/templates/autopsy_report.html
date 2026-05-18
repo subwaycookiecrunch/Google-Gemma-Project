@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PARASITE EVOLVED - AUTOPSY REPORT</title>
+    <style>
+        :root {
+            --bg: #020204;
+            --text: #e8e8f0;
+            --dim: #556677;
+            --primary: {{ '#00ff88' if is_symbiotic else '#ff2244' }};
+            --border: #1a1a2e;
+        }
+        
+        @page {
+            size: A4;
+            margin: 2cm;
+            @bottom-right {
+                content: "Page " counter(page) " of " counter(pages);
+                font-family: monospace;
+                font-size: 10px;
+                color: var(--dim);
+            }
+            @bottom-left {
+                content: "CASE: {{ session_id }}";
+                font-family: monospace;
+                font-size: 10px;
+                color: var(--dim);
+            }
+        }
+        
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .page-break {
+            page-break-before: always;
+        }
+        
+        h1, h2, h3, h4 {
+            color: var(--primary);
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-top: 2em;
+            margin-bottom: 1em;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5em;
+        }
+        
+        .cover-page {
+            text-align: center;
+            margin-top: 30%;
+        }
+        
+        .cover-title {
+            font-size: 48px;
+            color: var(--primary);
+            letter-spacing: 5px;
+            margin-bottom: 10px;
+            border: none;
+        }
+        
+        .cover-subtitle {
+            font-size: 18px;
+            color: var(--dim);
+            margin-bottom: 50px;
+        }
+        
+        .cover-details {
+            text-align: left;
+            margin: 0 auto;
+            width: 80%;
+            border: 1px solid var(--primary);
+            padding: 20px;
+            background-color: rgba(255, 34, 68, 0.05);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2em;
+        }
+        
+        th, td {
+            border: 1px solid var(--border);
+            padding: 10px;
+            text-align: left;
+        }
+        
+        th {
+            color: var(--primary);
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+        
+        .terminal-box {
+            border: 1px solid var(--border);
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: var(--primary);
+        }
+        
+        .qr-container {
+            text-align: center;
+            margin: 50px 0;
+        }
+        
+        .qr-container img {
+            width: 200px;
+            height: 200px;
+            border: 4px solid var(--primary);
+            padding: 10px;
+            background: var(--bg);
+        }
+        
+        .verdict {
+            font-size: 16px;
+            line-height: 2;
+            border-left: 4px solid var(--primary);
+            padding-left: 20px;
+            margin-top: 30px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PAGE 1: COVER -->
+    <div class="cover-page">
+        <h1 class="cover-title">☠ AUTOPSY REPORT</h1>
+        <div class="cover-subtitle">PARASITE EVOLVED — Post-Mortem Analysis</div>
+        
+        <div class="cover-details">
+            <table style="border: none; margin-bottom: 0;">
+                <tr><td style="border: none; color: var(--dim);">REPOSITORY</td><td style="border: none;">{{ inf_data.repo_path }}</td></tr>
+                <tr><td style="border: none; color: var(--dim);">TIMESTAMP</td><td style="border: none;">{{ timestamp }}</td></tr>
+                <tr><td style="border: none; color: var(--dim);">CASE ID</td><td style="border: none; color: var(--primary);">{{ session_id }}</td></tr>
+                <tr><td style="border: none; color: var(--dim);">CLASSIFICATION</td><td style="border: none;">CRITICAL / CONFIDENTIAL</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- PAGE 2: EXECUTIVE SUMMARY -->
+    <div class="page-break"></div>
+    <h2>EXECUTIVE SUMMARY</h2>
+    
+    <h3>VITAL STATISTICS</h3>
+    <table>
+        <tr>
+            <th>METRIC</th>
+            <th>VALUE</th>
+        </tr>
+        <tr>
+            <td>Files Autopsied</td>
+            <td>{{ inf_data.stats.files if inf_data.stats else 'N/A' }}</td>
+        </tr>
+        <tr>
+            <td>Functions Examined</td>
+            <td>{{ inf_data.stats.functions if inf_data.stats else 'N/A' }}</td>
+        </tr>
+        <tr>
+            <td>Feeding Points Found</td>
+            <td>{{ inf_data.feeding_points_raw|length }}</td>
+        </tr>
+        <tr>
+            <td>Dominant Strain</td>
+            <td>{{ ev_data.dominant.strain_id if ev_data.dominant else 'UNKNOWN' }}</td>
+        </tr>
+    </table>
+    
+    <h3>PROGNOSIS</h3>
+    <div class="terminal-box" style="color: var(--text);">
+        <p><strong style="color: var(--primary);">Time to Compromise:</strong> {{ rev_data.time_to_impact.minutes_to_complete_attack if rev_data.time_to_impact else 'N/A' }} minutes</p>
+        <p><strong style="color: var(--primary);">Natural Discovery:</strong> {{ rev_data.time_to_impact.days_to_natural_discovery if rev_data.time_to_impact else 'N/A' }} days</p>
+    </div>
+
+    <!-- PAGE 3: FEEDING POINTS -->
+    <div class="page-break"></div>
+    <h2>CRITICAL WOUNDS IDENTIFIED</h2>
+    {% for fp in inf_data.feeding_points_raw[:5] %}
+    <div class="terminal-box">
+        <div style="font-weight: bold; margin-bottom: 10px;">[{{ "FIXABLE" if is_symbiotic else "CRITICAL" }}] {{ fp.name }}()</div>
+        <div style="color: var(--text); font-size: 10px; margin-bottom: 10px;">File: {{ fp.file }}:{{ fp.line }}</div>
+        <div style="color: var(--dim); margin-bottom: 10px;">Blast: {{ "%.1f"|format(fp.blast_radius_score) }} | Stealth: {{ "%.1f"|format(fp.stealth_score) }}</div>
+        <div style="color: var(--text);">Vulnerability detected during static AST analysis.</div>
+    </div>
+    {% endfor %}
+
+    <!-- PAGE 4: ATTACK PATHS -->
+    <div class="page-break"></div>
+    <h2>LETHAL PATHWAYS</h2>
+    {% for path in rev_data.attack_paths %}
+    <div style="margin-bottom: 30px;">
+        <h4 style="border: none; margin-bottom: 10px;">{{ path.name }}</h4>
+        <div style="color: var(--dim); margin-bottom: 15px;">Detection Probability: {{ "%.0f"|format(path.detection_probability * 100) }}%</div>
+        
+        <table style="width: 100%;">
+            {% for step in path.steps %}
+            <tr>
+                <td style="width: 30px; color: var(--primary);">{{ step.step_number }}</td>
+                <td style="width: 150px; color: var(--dim);">{{ step.target_node }}</td>
+                <td>{{ step.action }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% endfor %}
+    
+    <!-- PAGE 5: SYMBIOTIC MODE (IF APPLICABLE) -->
+    {% if is_symbiotic %}
+    <div class="page-break"></div>
+    <h2>SYMBIOTIC ANALYSIS — PATH TO SURVIVAL</h2>
+    <div style="font-size: 72px; text-align: center; color: var(--primary); margin: 50px 0;">
+        GRADE: {{ sym_data.hardening_guide.risk_grade }}
+    </div>
+    
+    <h3>RECOMMENDATIONS</h3>
+    <table>
+        <tr>
+            <th>Priority</th>
+            <th>Vulnerability</th>
+            <th>Effort</th>
+        </tr>
+        {% for plan in sym_data.healing_plans %}
+        <tr>
+            <td style="color: var(--primary);">P{{ plan.priority }}</td>
+            <td>{{ plan.vulnerability_name }}</td>
+            <td>{{ plan.effort_estimate }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+
+    <!-- PAGE 6: CERTIFICATE & VERDICT -->
+    <div class="page-break"></div>
+    <h2>INFECTION CERTIFICATE</h2>
+    
+    <div class="qr-container">
+        <img src="{{ qr_code }}" alt="Certificate QR Code">
+        <div style="margin-top: 20px; font-size: 14px; font-weight: bold; color: var(--primary);">
+            {{ "SECURED" if is_symbiotic else "COMPROMISED" }} — {{ timestamp }}
+        </div>
+    </div>
+    
+    <table style="width: 80%; margin: 0 auto;">
+        <tr>
+            <td style="color: var(--dim); border: none;">TRANSACTION</td>
+            <td style="border: none;">{{ certificate.tx_hash }}</td>
+        </tr>
+        <tr>
+            <td style="color: var(--dim); border: none;">BLOCKCHAIN</td>
+            <td style="border: none;">{{ certificate.network }}</td>
+        </tr>
+        <tr>
+            <td style="color: var(--dim); border: none;">VERIFY URL</td>
+            <td style="border: none; color: var(--primary);">{{ certificate.verification_url }}</td>
+        </tr>
+    </table>
+
+    <div class="page-break"></div>
+    <h2>PARASITE'S TESTIMONY</h2>
+    <div class="verdict">
+        {% if is_symbiotic %}
+            {{ sym_data.hardening_guide.symbiotic_verdict }}
+        {% else %}
+            {{ rev_data.final_verdict }}
+        {% endif %}
+    </div>
+
+</body>
+</html>

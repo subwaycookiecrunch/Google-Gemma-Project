@@ -1,0 +1,153 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --font-mono: 'JetBrains Mono', monospace;
+  
+  --color-void: var(--bg-void);
+  --color-surface: var(--bg-surface);
+  --color-elevated: var(--bg-elevated);
+  
+  --color-parasite-green: var(--parasite-green);
+  --color-parasite-dim: var(--parasite-dim);
+  --color-parasite-glow: var(--parasite-glow);
+  
+  --color-critical-red: var(--critical-red);
+  --color-critical-dim: var(--critical-dim);
+  --color-critical-glow: var(--critical-glow);
+  
+  --color-strain-blue: var(--strain-blue);
+  --color-strain-glow: var(--strain-glow);
+  
+  --color-warning-amber: var(--warning-amber);
+  
+  --color-border-dim: var(--border-dim);
+  --color-border-glow: var(--border-glow);
+  
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-dim: var(--text-dim);
+  --color-text-code: var(--text-code);
+  --color-background: var(--bg-void);
+  --color-foreground: var(--text-primary);
+  --color-border: var(--border-dim);
+  --color-ring: var(--parasite-green);
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
+
+:root {
+  --bg-void: #020204;
+  --bg-surface: #08080f;
+  --bg-elevated: #0d0d1a;
+  --border-dim: #1a1a2e;
+  --border-glow: #2d2d5e;
+
+  --parasite-green: #00ff88;
+  --parasite-dim: #00cc6a;
+  --parasite-glow: #00ff8844;
+  
+  --critical-red: #ff2244;
+  --critical-dim: #cc1133;
+  --critical-glow: #ff224422;
+  
+  --strain-blue: #4488ff;
+  --strain-glow: #4488ff22;
+  
+  --warning-amber: #ffaa00;
+  --text-primary: #e8e8f0;
+  --text-secondary: #8888aa;
+  --text-dim: #444466;
+  --text-code: #00ff88;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: var(--bg-void);
+  --foreground: var(--text-primary);
+  --card: var(--bg-surface);
+  --card-foreground: var(--text-primary);
+  --popover: var(--bg-elevated);
+  --popover-foreground: var(--text-primary);
+  --primary: var(--parasite-green);
+  --primary-foreground: #000000;
+  --secondary: var(--bg-elevated);
+  --secondary-foreground: var(--text-primary);
+  --muted: var(--bg-elevated);
+  --muted-foreground: var(--text-secondary);
+  --accent: var(--border-dim);
+  --accent-foreground: var(--text-primary);
+  --destructive: var(--critical-red);
+  --destructive-foreground: #ffffff;
+  --border: var(--border-dim);
+  --input: var(--border-dim);
+  --ring: var(--parasite-green);
+}
+
+body {
+  background-color: var(--bg-void);
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+::selection {
+  background-color: var(--parasite-green);
+  color: var(--bg-void);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-void);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--parasite-dim);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--parasite-green);
+}
+
+.parasite-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-dim);
+  border-radius: 4px;
+  padding: 1.5rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.parasite-card:hover {
+  border-color: var(--border-glow);
+  box-shadow: 0 0 20px var(--parasite-glow);
+}
+
+.danger-badge {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 2px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  display: inline-block;
+}
+
+.danger-critical { 
+  background: var(--critical-glow); 
+  color: var(--critical-red);
+  border: 1px solid var(--critical-red);
+}
+
+.danger-high { 
+  background: #ff880022; 
+  color: #ff8800;
+  border: 1px solid #ff8800;
+}
+
+.danger-medium {
+  background: var(--strain-glow);
+  color: var(--strain-blue);
+  border: 1px solid var(--strain-blue);
+}

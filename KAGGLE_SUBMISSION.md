@@ -1,173 +1,81 @@
-# 🦠 PARASITE EVOLVED — AI-Powered Codebase Security Analysis
+# PARASITE EVOLVED
 
-## Tagline
-> **"What if a parasite lived inside your codebase? What would it eat first?"**
+## The idea
 
-PARASITE EVOLVED uses **Gemma 4** to simulate a living organism that infiltrates, evolves, and reveals vulnerabilities in any codebase — then heals the host from within.
+So here's what bugged me — every security tool I've used just throws a wall of CVEs at you and calls it a day. You get 200 warnings, most of them are noise, and you still have no idea how an actual attacker would chain things together to break in. That gap between "here's a list of issues" and "here's how someone would actually wreck your system" is massive, and nothing out there really bridges it.
 
----
+That's where PARASITE EVOLVED came from. I wanted to build something that thinks like an attacker, not a scanner. The whole concept is biological — treat the codebase like a living host, drop a parasite in it, let it find what it wants to eat, watch it evolve, and then see exactly how it would kill the host. And then flip it — use that same understanding to heal the code.
 
-## 🎯 Problem Statement
+Weird concept? Maybe. But it works really well.
 
-**Software vulnerabilities cost the global economy $9.5 trillion annually.** Traditional static analysis tools generate hundreds of alerts that developers ignore. Security audits are expensive, slow, and reactive.
+## What it actually does
 
-The core problem: **developers don't understand how attackers think.**
+There are four phases and they run in sequence:
 
-PARASITE EVOLVED flips the paradigm. Instead of listing CVEs, it simulates an adversary that:
-1. **Infiltrates** your repository like a biological parasite
-2. **Evolves** attack strains optimized for your specific codebase
-3. **Reveals** exactly how an attacker would exploit you — step by step
-4. **Heals** the host by generating real, deployable code fixes
+**Infiltration** — The system clones your repo (or reads a local path), parses every source file using Tree-sitter (supports Python, JavaScript, TypeScript, Java, and Go), and builds this massive 4-layer graph. The layers are file dependencies, function call chains, data flow from user input to dangerous sinks, and privilege operations like shell exec, database queries, auth handling, etc. For something like Jenkins which has 2000+ Java files, there's a smart prioritizer that scores files by security-relevant keyword density and picks the 200 most interesting ones. The whole thing finishes in about 4 seconds on Jenkins. Not minutes. Seconds.
 
----
+**Evolution** — This is the fun part. A genetic algorithm breeds 5 attack "strains", each one representing a different exploitation strategy. They get scored on stealth, blast radius, and persistence. Gemma 4 handles the mutation step — it looks at the actual code context and generates novel attack variations that are specific to YOUR repo. Not generic templates. Real stuff based on what it found.
 
-## 🧬 How Gemma 4 Powers PARASITE EVOLVED
+**Revelation** — The system generates three complete attack paths: data exfiltration, privilege escalation, and persistence. Every single step in these paths references actual functions from your codebase. If it says "inject through streamMagnet() in stream.go", that function actually exists and actually has that vulnerability. There's also a kill simulation timeline and a time-to-impact prediction using survival analysis. At the end, Gemma 4 writes a verdict — basically a dramatic summary of how screwed your codebase is (or isn't).
 
-Gemma 4 is the intelligence core of the system. We chose Gemma 4 because:
+**Symbiotic Healing** — This is where it stops being scary and starts being useful. For every vulnerability found, the system generates a real code fix. Not "add input validation" — actual code. Command injection? Here's the subprocess.run call with proper argument lists. SQL injection? Here's the parameterized query. Plus it builds a prioritized roadmap of what to fix first.
 
-- **Open-weight model** — can be deployed on-premise for organizations that can't send code to external APIs (banks, defense, healthcare)
-- **Safety alignment** — critical for a tool that generates attack paths and exploit simulations
-- **Strong code understanding** — Gemma 4's training on code makes it ideal for vulnerability analysis
+## How Gemma 4 fits in
 
-### Where Gemma 4 is used:
+I went with Gemma 4 for a few reasons. The obvious one is that security tools deal with sensitive code — production code, proprietary stuff. With Gemma 4 being open-weight, you can run the whole pipeline on-premise. Nobody's code leaves the building. That matters a LOT for anyone in healthcare, finance, government, etc.
 
-| Component | How Gemma 4 is Used |
-|-----------|-------------------|
-| **Attack Path Generation** | Analyzes real function graphs to generate unique, repo-specific attack trajectories |
-| **Mutation Engine** | Evolves vulnerability strains using fitness-guided generation |
-| **Verdict Synthesis** | Generates dramatic, contextual security verdicts grounded in actual scan data |
-| **Symbiotic Healing** | Produces real, deployable code fixes tailored to each vulnerability type |
-| **Hardening Roadmap** | Creates prioritized security improvement plans from scan results |
+But honestly the bigger reason is that it's just good at code. The attack path generation needs the model to look at a function graph and figure out how an attacker would chain calls together. The healing engine needs it to understand vulnerability patterns and write working fixes. Gemma 4 handles both of those surprisingly well.
 
-### Architecture
+Specifically, Gemma 4 powers:
+- Attack path generation (turns the function graph into realistic attack trajectories)
+- Mutation engine (evolves attack strains using real code context)
+- Verdict synthesis (writes the final security assessment)
+- Code fix generation (produces deployable patches for each vulnerability)
+- Hardening roadmaps (prioritizes what to fix and why)
 
-```
-┌─────────────────────────────────────────────────────┐
-│                   PARASITE EVOLVED                   │
-│                                                      │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐          │
-│  │ INFILTRATE│→│  EVOLVE  │→│  REVEAL  │          │
-│  │ AST Parse │  │ Mutation │  │ Attack   │          │
-│  │ Graph Build│  │ Fitness  │  │ Paths    │          │
-│  └──────────┘  └──────────┘  └──────────┘          │
-│       ↓              ↓              ↓               │
-│  ┌──────────────────────────────────────────┐       │
-│  │         🧠 GEMMA 4 (27B-IT)              │       │
-│  │   Verdict · Healing · Attack Strategy    │       │
-│  └──────────────────────────────────────────┘       │
-│       ↓                                             │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐         │
-│  │ SYMBIOTIC │  │ AUTOPSY  │  │ CERTIFICATE│        │
-│  │ Heal Host │  │ PDF Report│  │ On-Chain  │        │
-│  └──────────┘  └──────────┘  └──────────┘         │
-└─────────────────────────────────────────────────────┘
-```
+When the API key isn't set, everything still works — the system falls back to data-driven heuristics built from the actual scan results. No hardcoded templates, no fake data. Just less "creative" output.
 
----
+## The tech
 
-## 🔬 Technical Deep Dive
+Backend is Python with FastAPI. Tree-sitter does the AST parsing across all five languages. NetworkX builds and analyzes the graph. The genetic algorithm and fitness scoring are custom. Frontend is Next.js with Three.js for the 3D graph visualization (you can actually fly through your codebase's vulnerability graph, which is pretty cool). Framer Motion handles the animations.
 
-### Phase 1: Infiltration
-- **Multi-language AST parsing** via Tree-sitter (Python, JavaScript, TypeScript, Java, Go)
-- **4-layer graph construction**: File → Function → Data Flow → Privilege/Trust
-- **Smart file prioritization**: For massive repos (e.g., Jenkins with 2000+ files), scores files by security-keyword density and selects the top 200 highest-value targets
-- **Real-time progress tracking** with WebSocket-like polling for live scan status
+The progress tracking system uses a background thread architecture — when you submit a large repo, the scan runs async and the frontend polls for updates every 500ms. You see a live progress bar with files scanned, functions found, privilege operations detected, and an ETA. Makes scanning massive repos way less painful.
 
-### Phase 2: Evolution
-- **Genetic algorithm** evolves 5 attack strains per scan
-- **Fitness function** scores strains on: Stealth, Blast Radius, Persistence
-- **Gemma 4 mutation** generates novel attack variations using actual code context
-- Produces evolved strains like "The Silent Bleeder" and "The Impersonator"
+For the file prioritization on large repos: it reads the first 8KB of every file, scores it against a list of security-relevant keywords (exec, system, password, auth, query, etc.), penalizes huge generated files, and picks the top 200. This means even on a repo with thousands of files, you get results in seconds instead of minutes, and the results are focused on the files that actually matter for security.
 
-### Phase 3: Revelation
-- **Dynamic attack path generation** — NO hardcoded templates; every path references actual functions found in the target repo
-- **Kill simulation** timeline showing how an attacker would progress
-- **Time-to-impact prediction** using survival analysis curves
-- **Gemma 4 verdict** — a dramatic, context-aware assessment of the codebase's security posture
+## Numbers
 
-### Phase 4: Symbiotic Healing
-- **Real code fixes** — not generic "add validation" advice, but actual parameterized queries, subprocess.run replacements, and input sanitization code
-- **Prioritized hardening roadmap** generated by Gemma 4
-- **Autopsy report** — downloadable PDF with full findings
-- **Blockchain certificate** — optional on-chain proof of security audit
+| What | Result |
+|------|--------|
+| Jenkins (2000+ Java files) | 200 files selected, 3055 functions, 1007 priv ops, ~4 sec |
+| zentorrent (Go + JS) | 9 files, 29 functions, 5 priv ops, ~1.5 sec |
+| Attack paths per scan | 3 (exfil, privesc, persistence) |
+| Code fixes generated | 1 per vulnerability found |
 
-### Performance
-| Metric | Result |
-|--------|--------|
-| Jenkins (2000+ Java files) | **~4 seconds** |
-| zentorrent (Go + JS) | **~1.5 seconds** |
-| Functions parsed (Jenkins) | **3,055** |
-| Privilege operations found | **1,007** |
-| Attack paths generated | **3 unique paths** |
+## Why this matters
 
----
+Pentesting is expensive. Like, $5K-$50K per engagement expensive. And most open-source projects never get one. Most startups can't afford one. Most student projects definitely can't afford one.
 
-## 🌍 Impact: Safety & Trust
+This tool is free. It runs locally. It gives you the attacker's perspective, not just a list of findings. And it tells you exactly how to fix things.
 
-PARASITE EVOLVED directly addresses the **Safety & Trust** focus area:
+I think there's something powerful about making security accessible in a way that isn't just "here's another linting rule." Showing developers how an attacker would actually move through their code changes the way they think about security. It's not abstract anymore — it's concrete, it's visual, and it's specific to their codebase.
 
-### 1. Democratizing Security
-Traditional penetration testing costs $5,000-$50,000 per engagement. PARASITE EVOLVED is **free, open-source, and runs locally** — making enterprise-grade security analysis accessible to:
-- Solo developers and startups
-- Open-source maintainers
-- Students learning security
-- Organizations in developing regions
-
-### 2. Explainable Security AI
-Unlike black-box scanners, PARASITE EVOLVED shows its reasoning:
-- Every attack path traces through actual functions
-- Every vulnerability links to the exact line of code
-- The biological metaphor makes complex security concepts intuitive
-
-### 3. Local-First Architecture
-Gemma 4's open weights mean organizations can run the entire pipeline **on-premise**:
-- No code leaves the organization's network
-- HIPAA/SOC2/GDPR compliant by default
-- Works in air-gapped environments
-
-### 4. Proactive Defense
-Instead of waiting for breaches, PARASITE EVOLVED:
-- Simulates attacks before they happen
-- Generates defenses automatically
-- Provides a roadmap for continuous improvement
-
----
-
-## 🛠️ Technology Stack
-
-- **Backend**: Python, FastAPI, Tree-sitter, NetworkX
-- **Frontend**: Next.js 16, Three.js (3D graph visualization), Framer Motion
-- **AI**: Gemma 4 (27B-IT) via Google GenAI API
-- **Analysis**: AST parsing, graph algorithms, genetic algorithms, survival analysis
-
----
-
-## 🚀 How to Run
+## Running it
 
 ```bash
-# Clone the repository
-git clone https://github.com/subwaycookiecrunch/parasite-evolved.git
-cd parasite-evolved
+git clone https://github.com/subwaycookiecrunch/Google-Gemma-Project.git
+cd Google-Gemma-Project
 
-# Set up environment
 python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 echo "GEMINI_API_KEY=your_key" > .env
 
-# Start the platform
 cd frontend && npm install && npm run dev &
 cd .. && uvicorn backend.main:app --port 8000
-
-# Open http://localhost:3000
-# Paste any GitHub URL and click "Inject Parasite"
 ```
 
----
+Open localhost:3000, paste any GitHub URL, hit "Inject Parasite." That's it.
 
-## 👥 Team
-Built for the Gemma 4 Good Hackathon — Safety & Trust Track.
+## What's next
 
----
-
-## 📜 License
-Apache 2.0 — matching Gemma 4's open-source spirit.
+There's a bunch of stuff I want to add — multi-repo scanning for microservice architectures, WebGL rendering upgrades for really large graphs, JWT auth for multi-user deployments, and containerization so the PDF generation doesn't depend on local system libraries. But for now, it does what it's supposed to do: show you how an attacker sees your code, and help you fix it before they get the chance.
